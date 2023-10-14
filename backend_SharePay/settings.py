@@ -74,12 +74,26 @@ WSGI_APPLICATION = 'backend_SharePay.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
-DATABASES = {
+'''DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': BASE_DIR / 'db.sqlite3',
     }
+}'''
+
+#implementamos la conexion a PostgreSQL
+
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'zzzwibxg',      # Nombre de tu base de datos
+        'USER': 'zzzwibxg',  # Usuario de PostgreSQL
+        'PASSWORD': 'tMufa1_HhACbgXJeBXjTfY7lrZc9xhV4',  # Contraseña de PostgreSQL
+        'HOST': 'suleiman.db.elephantsql.com',       # Host de la base de datos (generalmente 'localhost')
+        'PORT': '5432',                # Puerto de la base de datos (generalmente vacío)
+    }
 }
+
 
 
 # Password validation
