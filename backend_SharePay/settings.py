@@ -11,6 +11,8 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 """
 
 from pathlib import Path
+import dj_database_url 
+import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -83,17 +85,20 @@ WSGI_APPLICATION = 'backend_SharePay.wsgi.application'
 
 #implementamos la conexion a PostgreSQL
 
-DATABASES = {
+'''DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'zzzwibxg',      # Nombre de tu base de datos
-        'USER': 'zzzwibxg',  # Usuario de PostgreSQL
-        'PASSWORD': 'tMufa1_HhACbgXJeBXjTfY7lrZc9xhV4',  # Contraseña de PostgreSQL
-        'HOST': 'suleiman.db.elephantsql.com',       # Host de la base de datos (generalmente 'localhost')
+        'NAME': 'dpg-ckl4rubj89us73cbu590-a',      # Nombre de tu base de datos
+        'USER': 'sharepaydb',  # Usuario de PostgreSQL
+        'PASSWORD': 'xDrjcxZ89uyNh0UWK1cLBy2mFSMfeDsi',  # Contraseña de PostgreSQL
+        'HOST': 'dpg-ckl4rubj89us73cbu590-a',       # Host de la base de datos (generalmente 'localhost')
         'PORT': '5432',                # Puerto de la base de datos (generalmente vacío)
     }
-}
+}'''
 
+DATABASES = {
+    'default': dj_database_url.parse(os.environ.get("DATABASE_URL"))
+}
 
 
 # Password validation
@@ -131,6 +136,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
 STATIC_URL = 'static/'
+MEDIA_URL= 'media/'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
