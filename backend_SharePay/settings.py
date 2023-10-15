@@ -8,6 +8,13 @@ https://docs.djangoproject.com/en/4.2/topics/settings/
 
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.2/ref/settings/
+
+
+superuser settings:
+email: admin@admin.com
+user: admin
+password: adminsharepay
+
 """
 
 from pathlib import Path
@@ -27,7 +34,7 @@ SECRET_KEY = 'django-insecure-)+96l_8do3)qedx$3&d$xz&q7x0=5tnkpr8l^^mt2p=(1+=-i&
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ["https://sharepay.onrender.com/","*"]
+ALLOWED_HOSTS = ["*"]
 
 
 # Application definition
@@ -39,12 +46,15 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'corsheaders',
+    'rest_framework',
     'backendApp'
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -76,12 +86,12 @@ WSGI_APPLICATION = 'backend_SharePay.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
-'''DATABASES = {
+DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': BASE_DIR / 'db.sqlite3',
     }
-}'''
+}
 
 #implementamos la conexion a PostgreSQL
 
@@ -96,9 +106,9 @@ WSGI_APPLICATION = 'backend_SharePay.wsgi.application'
     }
 }'''
 
-DATABASES = {
+'''DATABASES = {
     'default': dj_database_url.parse(os.environ.get("DATABASE_URL"))
-}
+}'''
 
 
 # Password validation
@@ -142,3 +152,5 @@ MEDIA_URL= 'media/'
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+CORS_ALLOWED_ORIGINS = []
