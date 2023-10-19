@@ -34,7 +34,7 @@ SECRET_KEY = 'django-insecure-)+96l_8do3)qedx$3&d$xz&q7x0=5tnkpr8l^^mt2p=(1+=-i&
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ["*"]
+ALLOWED_HOSTS = []
 
 
 # Application definition
@@ -48,6 +48,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'corsheaders',
     'rest_framework',
+    'coreapi',
     'backendApp'
 ]
 
@@ -154,3 +155,12 @@ MEDIA_URL= 'media/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 CORS_ALLOWED_ORIGINS = []
+
+REST_FRAMEWORK = {
+    'DEFAULT_SCHEMA_CLASS': 'rest_framework.schemas.coreapi.AutoSchema',
+}
+
+CORS_ORIGIN_WHITELIST = [
+    'http://127.0.0.1:8000',
+    'http://any.host.want.to.allow.to.access.this.server.com',
+]
