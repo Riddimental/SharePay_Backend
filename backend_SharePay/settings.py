@@ -159,13 +159,4 @@ CORS_ALLOWED_ORIGINS = []
 
 REST_FRAMEWORK = {
     'DEFAULT_SCHEMA_CLASS': 'rest_framework.schemas.coreapi.AutoSchema',
-<<<<<<< HEAD
 }
-
-CORS_ORIGIN_WHITELIST = [
-    'http://127.0.0.1:8000',
-    'http://any.host.want.to.allow.to.access.this.server.com',
-]
-=======
-}
->>>>>>> 94bbe99
