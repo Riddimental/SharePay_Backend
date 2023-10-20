@@ -33,15 +33,18 @@ class Usuarios(models.Model):
         choices=ESTADO_CHOICES,
         default='activo'  # activo por defecto
     )
+    
+    def __str__(self):
+        return self.Apodo
     '''
+    
     def set_password(self, raw_password):
         # Genera un hash de la contraseña
         self.password = make_password(raw_password)
         # Crea una instancia de Password para almacenar la contraseña
         Passwords.objects.create(UserID=self, Password=self.password)
     '''
-    def ___str___(self):
-        return self.Estado
+    
 
 '''
 al crear un usuario debe hacer:
@@ -55,6 +58,8 @@ class Passwords(models.Model):
     UserID = models.OneToOneField(Usuarios, on_delete=models.CASCADE)
     Password = models.CharField(max_length=128)
     Creado_en = models.DateTimeField(auto_now_add=True)
+    #Pregunta_Seguridad = models.CharField(max_length=255)
+    #Respuesta = models.CharField(max_length=255)
     
     def set_password(self, raw_password):
         self.password = make_password(raw_password)
@@ -67,8 +72,8 @@ class Passwords(models.Model):
 
 class Contactos(models.Model):
     ContactID = models.AutoField(primary_key=True)
-    UserID = models.ForeignKey(Usuarios, on_delete=models.CASCADE, related_name='contactos_usuario')
-    CorreoElectronico = models.ForeignKey(Usuarios, on_delete=models.CASCADE, to_field='CorreoElectronico', related_name='contactos_correo')
+    Contacto_de = models.ForeignKey(Usuarios, on_delete=models.CASCADE, related_name='contactos_usuario')
+    Contacto = models.ForeignKey(Usuarios, on_delete=models.CASCADE, related_name='contactos_correo')
 
 class Eventos(models.Model):
     EventoID = models.AutoField(primary_key=True)
