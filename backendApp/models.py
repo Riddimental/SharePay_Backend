@@ -1,8 +1,10 @@
 from django.db import models
+from django.contrib.auth.models import AbstractUser
+from django.contrib.auth.hashers import make_password, check_password
 
 class Usuarios(models.Model):
     UserID = models.AutoField(primary_key=True)
-    CorreoElectronico = models.CharField(max_length=255, unique=True)
+    CorreoElectronico = models.EmailField(unique=True)
     NombreCompleto = models.CharField(max_length=255)
     Apodo = models.CharField(max_length=255)
     
@@ -32,13 +34,46 @@ class Usuarios(models.Model):
         default='activo'  # activo por defecto
     )
     
-    def ___str___(self):
-        return self.Estado
+    def __str__(self):
+        return self.Apodo
+    '''
+    
+    def set_password(self, raw_password):
+        # Genera un hash de la contraseña
+        self.password = make_password(raw_password)
+        # Crea una instancia de Password para almacenar la contraseña
+        Passwords.objects.create(UserID=self, Password=self.password)
+    '''
+    
+
+'''
+al crear un usuario debe hacer:
+
+user = Usuarios(UserID='admin', CorreoElectronico='admin@example.com', NombreCompleto='admin', Apodo='admin', FotoOAvatar=, Estado )
+user.set_password('password123')  # Define la contraseña del usuario
+user.save()  # Guarda el superusuario en la base de datos
+'''
+
+class Passwords(models.Model):
+    UserID = models.OneToOneField(Usuarios, on_delete=models.CASCADE)
+    Password = models.CharField(max_length=128)
+    Creado_en = models.DateTimeField(auto_now_add=True)
+    #Pregunta_Seguridad = models.CharField(max_length=255)
+    #Respuesta = models.CharField(max_length=255)
+    
+    def set_password(self, raw_password):
+        self.password = make_password(raw_password)
+
+    def check_password(self, raw_password):
+        return check_password(raw_password, self.password)
+
+    def __str__(self):
+        return f" For {self.UserID.Apodo}"
 
 class Contactos(models.Model):
     ContactID = models.AutoField(primary_key=True)
-    UserID = models.ForeignKey(Usuarios, on_delete=models.CASCADE, related_name='contactos_usuario')
-    CorreoElectronico = models.ForeignKey(Usuarios, on_delete=models.CASCADE, to_field='CorreoElectronico', related_name='contactos_correo')
+    Contacto_de = models.ForeignKey(Usuarios, on_delete=models.CASCADE, related_name='contactos_usuario')
+    Contacto = models.ForeignKey(Usuarios, on_delete=models.CASCADE, related_name='contactos_correo')
 
 class Eventos(models.Model):
     EventoID = models.AutoField(primary_key=True)
