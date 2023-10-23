@@ -19,6 +19,7 @@ class Usuarios(models.Model):
     
     FotoOAvatar = models.CharField(
         max_length=225,
+        null=True,
         choices=OPCIONES_FOTO_AVATAR,
         default='https://static.vecteezy.com/system/resources/previews/019/896/012/original/female-user-avatar-icon-in-flat-design-style-person-signs-illustration-png.png'
     )
