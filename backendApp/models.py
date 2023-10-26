@@ -2,6 +2,7 @@ from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.contrib.auth.hashers import make_password, check_password
 
+
 class Usuarios(models.Model):
     UserID = models.AutoField(primary_key=True)
     CorreoElectronico = models.EmailField(unique=True)
@@ -36,7 +37,7 @@ class Usuarios(models.Model):
     )
     
     def __str__(self):
-        return self.Apodo
+        return self.CorreoElectronico
     '''
     
     def set_password(self, raw_password):
@@ -56,17 +57,18 @@ user.save()  # Guarda el superusuario en la base de datos
 '''
 
 class Passwords(models.Model):
-    UserID = models.OneToOneField(Usuarios, on_delete=models.CASCADE)
+    PasswordID = models.AutoField(primary_key=True)
+    CorreoElectronico = models.OneToOneField(Usuarios, to_field='CorreoElectronico', on_delete=models.CASCADE)
     Password = models.CharField(max_length=128)
     Creado_en = models.DateTimeField(auto_now_add=True)
     #Pregunta_Seguridad = models.CharField(max_length=255)
     #Respuesta = models.CharField(max_length=255)
     
     def set_password(self, raw_password):
-        self.password = make_password(raw_password)
+        self.Password = make_password(raw_password)
 
     def check_password(self, raw_password):
-        return check_password(raw_password, self.password)
+        return check_password(raw_password, self.Password)
 
     def __str__(self):
         return f" For {self.UserID.Apodo}"
