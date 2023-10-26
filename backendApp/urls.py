@@ -2,6 +2,7 @@ from django.urls import path, include
 from rest_framework.documentation import include_docs_urls
 from rest_framework import routers
 from . import views
+from .views import *
 
 router = routers.DefaultRouter()
 router.register(r'Usuarios', views.UsuariosView, 'Usuarios')
@@ -20,5 +21,7 @@ urlpatterns = [
    path("docs/", include_docs_urls(title='Backend API')),
    path('', views.defaultViews, name='default'),
    path('prueba1/', views.hello_world, name='hello_world'),
-   path('link2/', views.vistas, name='vistas')
+   path('link2/', views.vistas, name='vistas'), 
+   path('Usuarios/', UsuariosDetailView.as_view(), name='usuarios-detail'),
+   path('Passwords/', PasswordsDetailView.as_view(), name='passwords-detail'),
 ]
