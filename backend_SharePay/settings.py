@@ -34,7 +34,7 @@ SECRET_KEY = 'django-insecure-)+96l_8do3)qedx$3&d$xz&q7x0=5tnkpr8l^^mt2p=(1+=-i&
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ["*"]
+ALLOWED_HOSTS = []
 
 
 # Application definition
@@ -155,7 +155,9 @@ MEDIA_URL= 'media/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 #CORS auth
-CORS_ALLOWED_ORIGINS = []
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:3000"
+]
 
 REST_FRAMEWORK = {
     'DEFAULT_SCHEMA_CLASS': 'rest_framework.schemas.coreapi.AutoSchema',

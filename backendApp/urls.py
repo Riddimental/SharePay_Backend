@@ -20,5 +20,5 @@ urlpatterns = [
    path("docs/", include_docs_urls(title='Backend API')),
    path('', views.defaultViews, name='default'),
    path('prueba1/', views.hello_world, name='hello_world'),
-   path('link2/', views.vistas, name='vistas')
+   path('link2/', views.vistas, name='vistas'), 
 ]
