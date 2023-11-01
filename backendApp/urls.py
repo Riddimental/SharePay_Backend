@@ -17,6 +17,9 @@ router.register(r'Pagos', views.PagosView, 'Pagos')
 
 
 urlpatterns = [
+   path('log-in/', views.LogInView.as_view()),
+   path('log-out/', views.LogOutView.as_view()),
+   path('sign-up/', views.SignUpView.as_view()),
    path('api/v1/', include(router.urls)),
    path("docs/", include_docs_urls(title='Backend API')),
    path('', views.defaultViews, name='default'),

@@ -1,5 +1,6 @@
+from django.contrib.auth.models import User
 from django.db import models
-from django.contrib.auth.models import AbstractUser
+##from django.contrib.auth.models import AbstractUser
 from django.contrib.auth.hashers import make_password, check_password
 
 class Usuarios(models.Model):
@@ -7,6 +8,7 @@ class Usuarios(models.Model):
     CorreoElectronico = models.EmailField(unique=True)
     NombreCompleto = models.CharField(max_length=255)
     Apodo = models.CharField(max_length=255)
+    # user = models.OneToOneField(User, on_delete=models.DO_NOTHING)
     
     OPCIONES_FOTO_AVATAR = [
         ('https://static.vecteezy.com/system/resources/previews/019/896/012/original/female-user-avatar-icon-in-flat-design-style-person-signs-illustration-png.png',"avatar 1"),
