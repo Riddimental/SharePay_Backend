@@ -40,7 +40,8 @@ class SignUpView(CreateAPIView):
 class UsuariosView(viewsets.ModelViewSet):
    serializer_class = UsuariosSerializer
    queryset = Usuarios.objects.all()
-   
+   http_method_names = ['get']
+
    """
    List a queryset.
    """
@@ -58,6 +59,14 @@ class UsuariosView(viewsets.ModelViewSet):
 
       serializer = self.get_serializer(queryset, many=True)
       return Response(serializer.data)
+   
+   def create(self, request, *args, **kwargs):
+        # Lógica para crear un nuevo usuario a partir de los datos del request
+        serializer = UsuariosSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class PasswordsView(viewsets.ModelViewSet):
    serializer_class = PasswordsSerializer

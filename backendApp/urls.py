@@ -1,6 +1,7 @@
 from django.urls import path, include
 from rest_framework.documentation import include_docs_urls
 from rest_framework import routers
+from rest_framework.authtoken import views as tokenviews
 from . import views
 from .views import *
 
@@ -22,9 +23,8 @@ urlpatterns = [
    path('sign-up/', views.SignUpView.as_view()),
    path('api/v1/', include(router.urls)),
    path("docs/", include_docs_urls(title='Backend API')),
-   path('', views.defaultViews, name='default'),
-   path('prueba1/', views.hello_world, name='hello_world'),
-   path('link2/', views.vistas, name='vistas'), 
-   path('Usuarios/', UsuariosDetailView.as_view(), name='usuarios-detail'),
-   path('Passwords/', PasswordsDetailView.as_view(), name='passwords-detail'),
+   path('', views.defaultViews, name='default'), 
+   #path('Usuarios/', UsuariosView.as_view({'get': 'list'}), name='usuarios-detail'),
+   #path('Passwords/', PasswordsDetailView.as_view(), name='passwords-detail'),
+   path('generate_token/', tokenviews.obtain_auth_token),
 ]
