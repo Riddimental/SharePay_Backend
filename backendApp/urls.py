@@ -1,4 +1,5 @@
 from django.urls import path, include
+from django.contrib.auth.models import User
 from rest_framework.documentation import include_docs_urls
 from rest_framework import routers
 from rest_framework.authtoken import views as tokenviews
