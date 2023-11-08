@@ -2,6 +2,7 @@ from django.contrib.auth.models import User
 from django.http import HttpResponse
 from rest_framework import viewsets, status
 from rest_framework.authtoken.views import ObtainAuthToken
+from rest_framework.authtoken.serializers import AuthTokenSerializer
 from rest_framework.generics import CreateAPIView
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
@@ -10,18 +11,19 @@ from .serializer import *
 from .models import *
 
 
-def hello_world(request):
-   return HttpResponse("¡Hola, mundo!")
-
-def vistas(request):
-   return HttpResponse('vistas')
-
 def defaultViews(request):
-   return HttpResponse('bienvenido')
+   return HttpResponse('backend de Sharepay')
 
 class LogInView(ObtainAuthToken):
    permission_classes = [AllowAny]
    authentication_classes = []
+   def post(self, request, *args, **kwargs):
+        # Personaliza el uso de 'username' en lugar de 'email'
+        serializer = AuthTokenSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        user = serializer.validated_data['user']
+        token, created = Token.objects.get_or_create(user=user)
+        return Response({'token': token.key})
 
 
 class LogOutView(APIView):
