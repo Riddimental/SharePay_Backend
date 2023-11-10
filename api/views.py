@@ -1,5 +1,8 @@
 from django.contrib.auth.models import User
 from django.http import Http404, HttpResponse, JsonResponse
+from django.views import View
+from django.views.decorators.csrf import csrf_exempt
+from django.utils.decorators import method_decorator
 from django.shortcuts import get_object_or_404
 from rest_framework import viewsets, status
 from rest_framework.authtoken.views import ObtainAuthToken
@@ -16,6 +19,45 @@ from .models import *
 def defaultViews(request):
    return HttpResponse('backend de Sharepay')
 
+@method_decorator(csrf_exempt, name='dispatch')
+class UpdateUserView(View):
+    def post(self, request, *args, **kwargs):
+        username = request.POST.post('username')
+        user = get_object_or_404(User, username=username)
+
+        user.email = request.POST.post('email', user.email)
+        user.first_name = request.POST.post('first_name', user.first_name)
+        user.last_name = request.POST.post('last_name', user.last_name)
+        user.password = request.POST.post('password', user.password)
+
+        # Guarda los cambios en la base de datos
+        user.save()
+
+        user_data = {
+            'username': user.username,
+        }
+
+        return JsonResponse(user_data)
+
+@method_decorator(csrf_exempt, name='dispatch')
+class UpdateProfileView(View):
+    def post(self, request, *args, **kwargs):
+        username = request.POST.post('username')
+        user = get_object_or_404(Perfil, username=username)
+
+        user.FotoOAvatar = request.POST.post('FotoOAvatar', user.FotoOAvatar)
+        user.bio = request.POST.post('bio', user.bio)
+
+        # Guarda los cambios en la base de datos
+        user.save()
+
+        user_data = {
+            'username': user.username
+        }
+
+        return JsonResponse(user_data)
+
+
 def get_user_by_username(request):
     username = request.GET.get('username')
     user = get_object_or_404(User, username=username)
@@ -28,16 +70,6 @@ def get_user_by_username(request):
         'last_name': user.last_name,
     }
     return JsonResponse(user_data)
- 
- 
-class GetUser(APIView):
-    def get(self, request, username, format=None):
-        try:
-            user = User.objects.get(username=username)
-            serializer = UserSerializer(user)
-            return Response(serializer.data)
-        except User.DoesNotExist:
-            raise Http404("Usuario no encontrado")
 
 class LogInView(ObtainAuthToken):
    permission_classes = [AllowAny]
