@@ -25,7 +25,8 @@ urlpatterns = [
    path("docs/", include_docs_urls(title='Backend API')),
    path('', views.defaultViews, name='default'), 
    path('generate_token/', tokenviews.obtain_auth_token),
-   path('get_user/', views.get_user_by_username, name='get user information'),
+   path('get_user/', views.get_user, name='get user information'),
+   path('get_contacts/', views.get_contacts, name='get contacts information'),
    path('update_user/', views.UpdateUserView.as_view(), name='update usuario'),
    path('update_perfil/', views.UpdateProfileView.as_view(), name='update perfil'),
 ]

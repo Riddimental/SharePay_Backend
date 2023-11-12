@@ -18,21 +18,64 @@ from .models import *
 def defaultViews(request):
    return HttpResponse('backend de Sharepay')
 
-def get_user_by_username(request):
-   username = request.GET.get('username')
-   user = get_object_or_404(User, username=username)
-   user_data = {
-      'user_id': user.id,
-      'username': user.username,
-      'password': user.password,
-      'email': user.email,
-      'first_name': user.first_name,
-      'last_name': user.last_name,
-      'is_active': user.is_active,
-   }
-   return JsonResponse(user_data)
+def get_contacts(request):
+    userID = request.GET.get('user')
+
+    # Verifica si se proporciona un ID de usuario
+    if userID:
+        contacts = Contactos.objects.filter(Emisor=userID)
+    else:
+        # Si no se proporciona un ID de usuario, devuelve una respuesta de error
+        return JsonResponse({'error': 'Debes proporcionar un ID de usuario'}, status=400)
+
+    # Construye la lista de datos de contacto con información del perfil
+    contacts_data = []
+    for contact in contacts:
+        # Obtén el perfil del remitente
+        perfil_remitente = Perfil.objects.get(user=contact.Remitente)
+
+        contact_data = {
+            'ContactID': contact.ContactID,
+            'Emisor': contact.Emisor,
+            'Remitente': {
+                'username': contact.Remitente.username,
+                'email': contact.Remitente.email,
+                'perfil': {
+                    'bio': perfil_remitente.bio,
+                    'FotoOAvatar': perfil_remitente.FotoOAvatar,
+                }
+            },
+            'Estado': contact.Estado,
+        }
+        contacts_data.append(contact_data)
+
+    return JsonResponse(contacts_data, safe=False)
 
 
+def get_user(request):
+    username = request.GET.get('username')
+    email = request.GET.get('email')
+
+    # Verifica si se proporciona un nombre de usuario o un correo electrónico
+    if username:
+        user = get_object_or_404(User, username=username)
+    elif email:
+        user = get_object_or_404(User, email=email)
+    else:
+        # Si no se proporciona ni nombre de usuario ni correo electrónico, devuelve una respuesta de error
+        return JsonResponse({'error': 'Debes proporcionar un nombre de usuario o un correo electrónico'}, status=400)
+
+    user_data = {
+        'user_id': user.id,
+        'username': user.username,
+        'password': user.password,  # Ten en cuenta que devolver la contraseña no es seguro en un entorno de producción
+        'email': user.email,
+        'first_name': user.first_name,
+        'last_name': user.last_name,
+        'is_active': user.is_active,
+    }
+
+    return JsonResponse(user_data)
 
 class UpdateUserView(APIView):
    permission_classes = [IsAuthenticated]

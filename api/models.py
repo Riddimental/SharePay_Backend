@@ -1,5 +1,6 @@
 from django.contrib.auth.models import User
 from django.db import models
+from django.core.exceptions import ValidationError
 from django.db.models.signals import post_save
 from django.contrib.auth.hashers import make_password, check_password
 from django.dispatch import receiver
@@ -38,22 +39,37 @@ class Perfil(models.Model):
         verbose_name_plural = 'perfiles'
         ordering = ['user']
 
+
     def __str__(self):
         return self.user.username
-   
 
 
 class Contactos(models.Model):
     ContactID = models.AutoField(primary_key=True)
-    Emisor = models.ForeignKey(Perfil, on_delete=models.CASCADE, null=True, blank=True, related_name='owner')
-    Remitente = models.ForeignKey(Perfil, on_delete=models.CASCADE, related_name='contacto')
-    ESTADO_CHOICES = [('Aceptada','Aceptada'),('Rechazada','Rechazada'),('Pendiente','Pendiente')]
-    Estado = models.CharField(max_length=10, choices=ESTADO_CHOICES, default='Pendiente')#pendiente por defeto
-    
+    Emisor = models.ForeignKey('Perfil', on_delete=models.CASCADE, to_field="user", related_name='owner')
+    Remitente = models.ForeignKey('Perfil', on_delete=models.CASCADE, to_field="user", related_name='contacto')
+    ESTADO_CHOICES = [('Aceptada', 'Aceptada'), ('Rechazada', 'Rechazada'), ('Pendiente', 'Pendiente')]
+    Estado = models.CharField(max_length=10, choices=ESTADO_CHOICES, default='Pendiente')
+
+    def clean(self):
+        if not self.Emisor_id or not self.Remitente_id:
+            raise ValidationError("Los campos Emisor y Remitente no pueden estar en blanco.")
+        if self.Emisor_id == self.Remitente_id:
+            raise ValidationError("El Emisor y el Remitente no pueden ser el mismo.")
+
+    def save(self, *args, **kwargs):
+        self.full_clean()
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f"{self.Emisor} - {self.Remitente}"
+
     class Meta:
-      verbose_name='Contacto'
-      verbose_name_plural='Contactos'
-      ordering=['ContactID']
+        verbose_name = 'Contacto'
+        verbose_name_plural = 'Contactos'
+        ordering = ['ContactID']
+        unique_together = [['Emisor', 'Remitente'], ['Remitente', 'Emisor']]
+
 
 class Eventos(models.Model):
     EventoID = models.AutoField(primary_key=True)
