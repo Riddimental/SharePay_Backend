@@ -11,4 +11,4 @@ subprocess.run(['pip', 'install', '--upgrade', 'pip'])
 subprocess.run(['pip', 'install', '-r', 'requirements.txt'])
 
 # Desactivar el entorno virtual
-subprocess.run(['deactivate'])
+# subprocess.run(['deactivate'], shell=True)
