@@ -1,0 +1,5 @@
+{
+   "scripts": {
+     "build": "[backend_SharePay] build --output public"
+   }
+ }
