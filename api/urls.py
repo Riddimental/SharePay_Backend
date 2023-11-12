@@ -7,8 +7,7 @@ from . import views
 from .views import *
 
 router = routers.DefaultRouter()
-router.register(r'Usuarios', views.UsuariosView, 'Usuarios')
-router.register(r'Passwords', views.PasswordsView, 'Passwords')
+router.register(r'Perfiles', views.PerfilView , 'Usuarios')
 router.register(r'Contactos', views.ContactosView, 'Contactos')
 router.register(r'Eventos', views.EventosView, 'Eventos')
 router.register(r'ParticipantesEvento', views.ParticipantesEventoView, 'ParticipantesEvento')
@@ -25,7 +24,9 @@ urlpatterns = [
    path('api/v1/', include(router.urls)),
    path("docs/", include_docs_urls(title='Backend API')),
    path('', views.defaultViews, name='default'), 
-   #path('Usuarios/', UsuariosView.as_view({'get': 'list'}), name='usuarios-detail'),
-   #path('Passwords/', PasswordsDetailView.as_view(), name='passwords-detail'),
    path('generate_token/', tokenviews.obtain_auth_token),
+   path('get_user/', views.get_user_by_username, name='get user information'),
+   path('update_user/', views.UpdateUserView.as_view(), name='update usuario'),
+   path('update_perfil/', views.UpdateProfileView.as_view(), name='update perfil'),
 ]
+
