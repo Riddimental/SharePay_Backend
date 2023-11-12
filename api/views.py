@@ -15,7 +15,6 @@ from .serializer import *
 from .models import *
 
 
-
 def defaultViews(request):
    return HttpResponse('backend de Sharepay')
 
@@ -54,42 +53,52 @@ def update_user_info(request):
     return Response({'message': 'Información del usuario actualizada correctamente'})
 
 
+
 class UpdateUserView(APIView):
    permission_classes = [IsAuthenticated]
 
    def post(self, request, *args, **kwargs):
       # Obtener datos del usuario desde la solicitud
-      username = request.data.get('username')
+      usuario = request.data.get('username')
       email = request.data.get('email')
       first_name = request.data.get('first_name')
       last_name = request.data.get('last_name')
       password = request.data.get('password')
 
       # Buscar el usuario existente por nombre de usuario
-      user = User.objects.get(username=username)
+      user = get_object_or_404(User, username=usuario)
 
       # Actualizar los campos del usuario
-      user.email = email if email else user.email
-      user.first_name = first_name if first_name else user.first_name
-      user.last_name = last_name if last_name else user.last_name
-      user.set_password(password) if password else None
+      user.email = email or user.email
+      user.first_name = first_name or user.first_name
+      user.last_name = last_name or user.last_name
+      if password:
+          # Validar y requerir contraseñas seguras si es necesario
+          user.set_password(password)
       user.save()
 
       return Response({'message': 'Usuario actualizado exitosamente'})
 
-
-class UpdateProfileView(View):
+class UpdateProfileView(APIView):
+   permission_classes = [IsAuthenticated]
+   
    def post(self, request, *args, **kwargs):
-      username = request.POST.get('username')
-      user = get_object_or_404(Perfil, username=username)
+      usuario = request.data.get('username')
+      user = get_object_or_404(Perfil, user=usuario)
 
-      user.FotoOAvatar = request.POST.get('FotoOAvatar', user.FotoOAvatar)
-      user.bio = request.POST.get('bio', user.bio)
+      # Obtener datos del perfil desde la solicitud
+      foto_avatar = request.data.get('FotoOAvatar', user.FotoOAvatar)
+      bio = request.data.get('bio', user.bio)
 
-      # Guarda los cambios en la base de datos
+      # Actualizar los campos del perfil
+      user.FotoOAvatar = foto_avatar or user.FotoOAvatar
+      user.bio = bio or user.bio
+
+      # Guardar los cambios en la base de datos
       user.save()
 
       return Response({'message': 'Perfil actualizado exitosamente'})
+
 
 
 
