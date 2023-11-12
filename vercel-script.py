@@ -2,7 +2,7 @@ import subprocess
 
 # Crear y activar un entorno virtual
 subprocess.run(['python3', '-m', 'venv', 'venv'])
-subprocess.run(['source', 'venv/bin/activate'], shell=True)
+subprocess.run(['venv/bin/activate'], shell=True)
 
 # actualiza pip
 subprocess.run(['pip', 'install', '--upgrade', 'pip'])
