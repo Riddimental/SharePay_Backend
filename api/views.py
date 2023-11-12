@@ -28,29 +28,9 @@ def get_user_by_username(request):
       'email': user.email,
       'first_name': user.first_name,
       'last_name': user.last_name,
+      'is_active': user.is_active,
    }
    return JsonResponse(user_data)
-
-@api_view(['POST'])
-@permission_classes([IsAuthenticated])
-@authentication_classes([])
-def update_user_info(request):
-    user = request.user
-
-    # Actualiza la información del usuario con los datos del request
-    user.email = request.data.get('email', user.email)
-    user.first_name = request.data.get('first_name', user.first_name)
-    user.last_name = request.data.get('last_name', user.last_name)
-
-    # Actualiza la contraseña si se proporciona en la solicitud
-    new_password = request.data.get('password')
-    if new_password:
-        user.set_password(new_password)
-
-    # Guarda los cambios en la base de datos
-    user.save()
-
-    return Response({'message': 'Información del usuario actualizada correctamente'})
 
 
 
@@ -64,6 +44,8 @@ class UpdateUserView(APIView):
       first_name = request.data.get('first_name')
       last_name = request.data.get('last_name')
       password = request.data.get('password')
+      is_active = request.data.get('is_active', True)  # Valor predeterminado es True si no se proporciona
+
 
       # Buscar el usuario existente por nombre de usuario
       user = get_object_or_404(User, username=usuario)
@@ -72,6 +54,7 @@ class UpdateUserView(APIView):
       user.email = email or user.email
       user.first_name = first_name or user.first_name
       user.last_name = last_name or user.last_name
+      user.is_active = is_active
       if password:
           # Validar y requerir contraseñas seguras si es necesario
           user.set_password(password)
