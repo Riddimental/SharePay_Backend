@@ -6,8 +6,8 @@ subprocess.run(['python3', '-m', 'venv', 'venv'])
 
 # Activar el entorno virtual
 venv_activate_script = os.path.join('venv', 'bin', 'activate')
-subprocess.run(['chmod', '+x', venv_activate_script])
-subprocess.run([venv_activate_script])
+activate_command = f'source {venv_activate_script}'
+subprocess.run(['/bin/bash', '-c', activate_command], shell=True)
 
 # Actualizar pip
 subprocess.run(['pip', 'install', '--upgrade', 'pip'])
