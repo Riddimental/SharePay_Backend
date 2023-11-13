@@ -1,7 +1,7 @@
 from django.contrib.auth.models import User
 from django.http import Http404, HttpResponse, JsonResponse
 from django.views import View
-from django.shortcuts import get_object_or_404
+from django.shortcuts import get_object_or_404, render
 from rest_framework import viewsets, status
 from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.authtoken.serializers import AuthTokenSerializer
@@ -17,13 +17,24 @@ from .models import *
 
 def defaultViews(request):
    return HttpResponse('backend de Sharepay')
-
+'''
 def get_contacts(request):
-    userID = request.GET.get('user')
+   
+    emisor_username = request.GET.get('Emisor')
+    contactos_de_emisor = get_object_or_404(Contactos, Emisor=emisor_username)
+    
+    perfil_remitente = Perfil.objects.get(user=contactos_de_emisor)
+
+    # Convierte el objeto Perfil a un diccionario serializable
+    perfil_remitente_data = {
+        'user': perfil_remitente.user.username,
+        'bio': perfil_remitente.bio,
+        'FotoOAvatar': perfil_remitente.FotoOAvatar,
+    }
 
     # Verifica si se proporciona un ID de usuario
-    if userID:
-        contacts = Contactos.objects.filter(Emisor=userID)
+    if emisor_username:
+        contacts = Contactos.objects.filter(Emisor=emisor_username)
     else:
         # Si no se proporciona un ID de usuario, devuelve una respuesta de error
         return JsonResponse({'error': 'Debes proporcionar un ID de usuario'}, status=400)
@@ -32,25 +43,31 @@ def get_contacts(request):
     contacts_data = []
     for contact in contacts:
         # Obtén el perfil del remitente
-        perfil_remitente = Perfil.objects.get(user=contact.Remitente)
-
+        perfil_remitente = Perfil.objects.get(user=contactos_de_emisor)
         contact_data = {
             'ContactID': contact.ContactID,
             'Emisor': contact.Emisor,
-            'Remitente': {
-                'username': contact.Remitente.username,
-                'email': contact.Remitente.email,
-                'perfil': {
-                    'bio': perfil_remitente.bio,
-                    'FotoOAvatar': perfil_remitente.FotoOAvatar,
-                }
-            },
+            'Remitente': perfil_remitente_data,
             'Estado': contact.Estado,
         }
         contacts_data.append(contact_data)
 
     return JsonResponse(contacts_data, safe=False)
+'''
 
+def get_user_contacts(request):
+    # Obtén el nombre de usuario desde la solicitud GET
+    username = request.GET.get('username')
+
+    # Obtiene el objeto User asociado al nombre de usuario proporcionado
+    user = get_object_or_404(User, username=username)
+
+    # Obtiene todos los contactos del usuario
+    user_contacts = Contactos.objects.filter(Emisor__user=user)
+
+    # Serializa los datos si es necesario y devuelve una respuesta JSON
+    data = [{'remitente': contacto.Remitente.user.username, 'estado': contacto.Estado} for contacto in user_contacts]
+    return JsonResponse({'user_contacts': data})
 
 def get_user(request):
     username = request.GET.get('username')
