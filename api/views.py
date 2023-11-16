@@ -66,7 +66,13 @@ def get_user_contacts(request):
     user_contacts = Contactos.objects.filter(Emisor__user=user)
 
     # Serializa los datos si es necesario y devuelve una respuesta JSON
-    data = [{'remitente': contacto.Remitente.user.username, 'estado': contacto.Estado} for contacto in user_contacts]
+    data = [{
+        'remitente': {
+            'username': contacto.Remitente.user.username,
+            'avatar': contacto.Remitente.FotoOAvatar,
+        },
+        'estado': contacto.Estado
+    } for contacto in user_contacts]
     return JsonResponse({'user_contacts': data})
 
 def get_user(request):
@@ -144,6 +150,25 @@ class UpdateProfileView(APIView):
 
 
 
+class UpdateContactsView(APIView):
+   permission_classes = [IsAuthenticated]
+   
+   def post(self, request, *args, **kwargs):
+      usuario = request.data.get('username')
+      user = get_object_or_404(Perfil, user=usuario)
+
+      # Obtener datos del perfil desde la solicitud
+      foto_avatar = request.data.get('FotoOAvatar', user.FotoOAvatar)
+      bio = request.data.get('bio', user.bio)
+
+      # Actualizar los campos del perfil
+      user.FotoOAvatar = foto_avatar or user.FotoOAvatar
+      user.bio = bio or user.bio
+
+      # Guardar los cambios en la base de datos
+      user.save()
+
+      return Response({'message': 'Perfil actualizado exitosamente'})
 
 class LogInView(ObtainAuthToken):
    permission_classes = [AllowAny]

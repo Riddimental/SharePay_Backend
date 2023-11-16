@@ -28,6 +28,7 @@ urlpatterns = [
    path('get_user/', views.get_user, name='get user information'),
    path('get_contacts/', views.get_user_contacts, name='get contacts information'),
    path('update_user/', views.UpdateUserView.as_view(), name='update usuario'),
+   path('update_contactos/', views.UpdateContactsView.as_view(), name='update usuario'),
    path('update_perfil/', views.UpdateProfileView.as_view(), name='update perfil'),
 ]
 

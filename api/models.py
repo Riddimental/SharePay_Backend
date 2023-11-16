@@ -12,11 +12,11 @@ def create_user_profile(sender, instance, created, **kwargs):
 
 @receiver(post_save, sender=User)
 def save_user_profile(sender, instance, **kwargs):
-    instance.perfil.save()
+    instance.Perfil.save()
 
 
 class Perfil(models.Model):
-    user = models.OneToOneField(User, to_field="username", on_delete=models.CASCADE, related_name='perfil')
+    user = models.OneToOneField(User, to_field="username", on_delete=models.CASCADE, related_name='Perfil')
     bio = models.TextField(max_length=400, null=True, blank=True)
 
     OPCIONES_FOTO_AVATAR = [
@@ -46,9 +46,9 @@ class Perfil(models.Model):
 
 class Contactos(models.Model):
     ContactID = models.AutoField(primary_key=True)
-    Emisor = models.ForeignKey('Perfil', on_delete=models.CASCADE, to_field="user", related_name='owner')
-    Remitente = models.ForeignKey('Perfil', on_delete=models.CASCADE, to_field="user", related_name='contacto')
-    ESTADO_CHOICES = [('Aceptada', 'Aceptada'), ('Rechazada', 'Rechazada'), ('Pendiente', 'Pendiente')]
+    Emisor = models.ForeignKey('Perfil', on_delete=models.CASCADE, to_field="user", related_name='Contacto_emisor')
+    Remitente = models.ForeignKey('Perfil', on_delete=models.CASCADE, to_field="user", related_name='Contacto_remitente')
+    ESTADO_CHOICES = [('Aceptada', 'Aceptada'), ('Rechazada', 'Rechazada'), ('Pendiente', 'Pendiente')]#Rechazada representa el fin del contacto, cuando se elimina un contacto, este atributo se pone en Rechazada aunque hubiera estado aceptada antes.
     Estado = models.CharField(max_length=10, choices=ESTADO_CHOICES, default='Pendiente')
 
     def clean(self):
@@ -73,7 +73,7 @@ class Contactos(models.Model):
 
 class Eventos(models.Model):
     EventoID = models.AutoField(primary_key=True)
-    Creador = models.ForeignKey(Perfil, on_delete=models.CASCADE)
+    Creador = models.ForeignKey('Perfil', on_delete=models.CASCADE, to_field="user", related_name='Ecentos_creador')
     Nombre = models.CharField(max_length=255)
     Descripcion = models.TextField(null=True, blank=True)
     
@@ -100,7 +100,7 @@ class Eventos(models.Model):
 
 class ParticipantesEvento(models.Model):
     ParticipanteID = models.AutoField(primary_key=True)
-    Apodo = models.ForeignKey(Perfil, on_delete=models.CASCADE)
+    Apodo = models.ForeignKey('Perfil', on_delete=models.CASCADE, to_field="user", related_name='Eventos_participante')
     EventoID = models.ForeignKey(Eventos, on_delete=models.CASCADE)
     
     ESTADO_CHOICES = [
@@ -122,7 +122,7 @@ class ParticipantesEvento(models.Model):
 class Actividades(models.Model):
     ActividadID = models.AutoField(primary_key=True)
     EventoID = models.ForeignKey(Eventos, on_delete=models.CASCADE)
-    Creador = models.ForeignKey(Perfil, on_delete=models.CASCADE)
+    Creador = models.ForeignKey('Perfil', on_delete=models.CASCADE, to_field="user", related_name='Actividad_creador')
     Descripcion = models.TextField()
     ValorTotal = models.DecimalField(max_digits=10, decimal_places=2)
     
@@ -134,7 +134,7 @@ class Actividades(models.Model):
 class ParticipantesActividad(models.Model):
     ActividadParticipanteID = models.AutoField(primary_key=True)
     ActividadID = models.ForeignKey(Actividades, on_delete=models.CASCADE)
-    Apodo = models.ForeignKey(Perfil, on_delete=models.CASCADE)
+    Apodo = models.ForeignKey('Perfil', on_delete=models.CASCADE, to_field="user", related_name='Actividad_participantes')
     PorcentajeParticipacion = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
     ValorFijo = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
     
@@ -146,7 +146,7 @@ class ParticipantesActividad(models.Model):
 class Saldos(models.Model):
     SaldoID = models.AutoField(primary_key=True)
     EventoID = models.ForeignKey(Eventos, on_delete=models.CASCADE)
-    Apodo = models.ForeignKey(Perfil, on_delete=models.CASCADE)
+    Apodo = models.ForeignKey('Perfil', on_delete=models.CASCADE, to_field="user", related_name='Saldo_para')
     TotalDeuda = models.DecimalField(max_digits=10, decimal_places=2)
     TotalPago = models.DecimalField(max_digits=10, decimal_places=2)
     
@@ -157,8 +157,8 @@ class Saldos(models.Model):
 
 class Pagos(models.Model):
     PagoID = models.AutoField(primary_key=True)
-    Deudor = models.ForeignKey(Perfil, on_delete=models.CASCADE, related_name='deudor_usuario')
-    Acreedor = models.ForeignKey(Perfil, on_delete=models.CASCADE, related_name='acreedor_ususario')
+    Deudor = models.ForeignKey('Perfil', on_delete=models.CASCADE, to_field="user", related_name='Pagos_deudor')
+    Acreedor = models.ForeignKey('Perfil', on_delete=models.CASCADE, to_field="user", related_name='Pagos_acreedor')
     Valor = models.DecimalField(max_digits=10, decimal_places=2)
     FechaPago = models.DateField()
     Completado = models.BooleanField(default=False)
