@@ -17,43 +17,19 @@ from .models import *
 
 def defaultViews(request):
    return HttpResponse('backend de Sharepay')
-'''
-def get_contacts(request):
-   
-    emisor_username = request.GET.get('Emisor')
-    contactos_de_emisor = get_object_or_404(Contactos, Emisor=emisor_username)
-    
-    perfil_remitente = Perfil.objects.get(user=contactos_de_emisor)
 
-    # Convierte el objeto Perfil a un diccionario serializable
-    perfil_remitente_data = {
-        'user': perfil_remitente.user.username,
-        'bio': perfil_remitente.bio,
-        'FotoOAvatar': perfil_remitente.FotoOAvatar,
-    }
+def have_common_events(request):
+    profile1 = request.GET.get('Emisor')
+    profile2 = request.GET.get('Remitente')
+    events_profile1 = ParticipantesEvento.objects.filter(Apodo=profile1, Estado='activo').values_list('EventoID', flat=True)
+    events_profile2 = ParticipantesEvento.objects.filter(Apodo=profile2, Estado='activo').values_list('EventoID', flat=True)
 
-    # Verifica si se proporciona un ID de usuario
-    if emisor_username:
-        contacts = Contactos.objects.filter(Emisor=emisor_username)
-    else:
-        # Si no se proporciona un ID de usuario, devuelve una respuesta de error
-        return JsonResponse({'error': 'Debes proporcionar un ID de usuario'}, status=400)
+    # Check for common events
+    common_events = set(events_profile1).intersection(events_profile2)
 
-    # Construye la lista de datos de contacto con información del perfil
-    contacts_data = []
-    for contact in contacts:
-        # Obtén el perfil del remitente
-        perfil_remitente = Perfil.objects.get(user=contactos_de_emisor)
-        contact_data = {
-            'ContactID': contact.ContactID,
-            'Emisor': contact.Emisor,
-            'Remitente': perfil_remitente_data,
-            'Estado': contact.Estado,
-        }
-        contacts_data.append(contact_data)
+    return common_events
 
-    return JsonResponse(contacts_data, safe=False)
-'''
+
 
 def get_user_contacts(request):
     # Obtén el nombre de usuario desde la solicitud GET

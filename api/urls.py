@@ -27,6 +27,7 @@ urlpatterns = [
    path('generate_token/', tokenviews.obtain_auth_token),
    path('get_user/', views.get_user, name='get user information'),
    path('get_contacts/', views.get_user_contacts, name='get contacts information'),
+   path('have_common_events/', views.have_common_events, name='gives true if common events'),
    path('update_user/', views.UpdateUserView.as_view(), name='update usuario'),
    path('update_contactos/', views.UpdateContactsView.as_view(), name='update usuario'),
    path('update_perfil/', views.UpdateProfileView.as_view(), name='update perfil'),

@@ -73,7 +73,7 @@ class Contactos(models.Model):
 
 class Eventos(models.Model):
     EventoID = models.AutoField(primary_key=True)
-    Creador = models.ForeignKey('Perfil', on_delete=models.CASCADE, to_field="user", related_name='Ecentos_creador')
+    Creador = models.ForeignKey('Perfil', on_delete=models.CASCADE, to_field="user", related_name='Eventos_creador')
     Nombre = models.CharField(max_length=255)
     Descripcion = models.TextField(null=True, blank=True)
     
