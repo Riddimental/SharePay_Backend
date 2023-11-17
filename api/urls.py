@@ -30,6 +30,7 @@ urlpatterns = [
    path('have_common_events/', views.have_common_events, name='get list of common events'),
    path('update_user/', views.UpdateUserView.as_view(), name='update user information'),
    path('update_contactos/', views.UpdateContactsView.as_view(), name='update contacts information'),
+   path('create_contactos/', views.CreateContactsView.as_view(), name='Create contacts'),
    path('update_perfil/', views.UpdateProfileView.as_view(), name='update perfil'),
 ]
 

@@ -41,10 +41,14 @@ def get_user_contacts(request):
     user = get_object_or_404(User, username=username)
 
     # Obtiene todos los contactos del usuario
-    user_contacts = Contactos.objects.filter(Emisor__user=user)
+    user_contacts = Contactos.objects.all()
 
     # Serializa los datos si es necesario y devuelve una respuesta JSON
     data = [{
+       'emisor': {
+            'username': contacto.Emisor.user.username,
+            'avatar': contacto.Emisor.FotoOAvatar,
+        },
         'remitente': {
             'username': contacto.Remitente.user.username,
             'avatar': contacto.Remitente.FotoOAvatar,
@@ -126,6 +130,26 @@ class UpdateProfileView(APIView):
 
       return Response({'message': 'Perfil actualizado exitosamente'})
 
+class CreateContactsView(APIView):
+   permission_classes = [IsAuthenticated]
+   
+   def post(self, request, *args, **kwargs):
+      usuario_emisor = request.data.get('Emisor')
+      usuario_remitente = request.data.get('Remitente')
+      
+      # Verificar si el contacto ya existe
+      existing_contact = Contactos.objects.filter(Q(Emisor=usuario_emisor, Remitente=usuario_remitente)).first()
+      
+      if existing_contact:
+          return Response({'message': 'El contacto ya existe'}, status=status.HTTP_400_BAD_REQUEST)
+      
+      # Crear un nuevo contacto
+      emisor_instance = get_object_or_404(Perfil, user=usuario_emisor)
+      remitente_instance = get_object_or_404(Perfil, user=usuario_remitente)
+      
+      nuevo_contacto = Contactos.objects.create(Emisor=emisor_instance, Remitente=remitente_instance, Estado='Pendiente')
+
+      return Response({'message': 'Contacto creado exitosamente'})
 
 class UpdateContactsView(APIView):
     permission_classes = [IsAuthenticated]

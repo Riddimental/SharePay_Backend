@@ -48,7 +48,7 @@ class Contactos(models.Model):
     ContactID = models.AutoField(primary_key=True)
     Emisor = models.ForeignKey('Perfil', on_delete=models.CASCADE, to_field="user", related_name='Contacto_emisor')
     Remitente = models.ForeignKey('Perfil', on_delete=models.CASCADE, to_field="user", related_name='Contacto_remitente')
-    ESTADO_CHOICES = [('Aceptada', 'Aceptada'), ('Rechazada', 'Rechazada'), ('Pendiente', 'Pendiente')]#Rechazada representa el fin del contacto, cuando se elimina un contacto, este atributo se pone en Rechazada aunque hubiera estado aceptada antes.
+    ESTADO_CHOICES = [('Aceptada', 'Aceptada'), ('Rechazada', 'Rechazada'), ('Pendiente', 'Pendiente'), ('Eliminado', 'Eliminado')]#Rechazada representa el fin del contacto, cuando se elimina un contacto, este atributo se pone en Rechazada aunque hubiera estado aceptada antes.
     Estado = models.CharField(max_length=10, choices=ESTADO_CHOICES, default='Pendiente')
 
     def clean(self):
