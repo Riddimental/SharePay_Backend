@@ -7,7 +7,7 @@ from . import views
 from .views import *
 
 router = routers.DefaultRouter()
-router.register(r'Perfiles', views.PerfilView , 'Usuarios')
+router.register(r'Perfiles', views.PerfilView , 'Perfiles')
 router.register(r'Contactos', views.ContactosView, 'Contactos')
 router.register(r'Eventos', views.EventosView, 'Eventos')
 router.register(r'ParticipantesEvento', views.ParticipantesEventoView, 'ParticipantesEvento')
@@ -27,9 +27,9 @@ urlpatterns = [
    path('generate_token/', tokenviews.obtain_auth_token),
    path('get_user/', views.get_user, name='get user information'),
    path('get_contacts/', views.get_user_contacts, name='get contacts information'),
-   path('have_common_events/', views.have_common_events, name='gives true if common events'),
-   path('update_user/', views.UpdateUserView.as_view(), name='update usuario'),
-   path('update_contactos/', views.UpdateContactsView.as_view(), name='update usuario'),
+   path('have_common_events/', views.have_common_events, name='get list of common events'),
+   path('update_user/', views.UpdateUserView.as_view(), name='update user information'),
+   path('update_contactos/', views.UpdateContactsView.as_view(), name='update contacts information'),
    path('update_perfil/', views.UpdateProfileView.as_view(), name='update perfil'),
 ]
 

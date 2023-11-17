@@ -1,5 +1,6 @@
 from django.contrib.auth.models import User
 from django.http import Http404, HttpResponse, JsonResponse
+from django.db.models import Q
 from django.views import View
 from django.shortcuts import get_object_or_404, render
 from rest_framework import viewsets, status
@@ -7,6 +8,7 @@ from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.authtoken.serializers import AuthTokenSerializer
 from rest_framework.authtoken.models import Token
 from rest_framework.decorators import api_view, permission_classes, authentication_classes
+from rest_framework.filters import SearchFilter
 from rest_framework.generics import CreateAPIView
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
@@ -25,9 +27,9 @@ def have_common_events(request):
     events_profile2 = ParticipantesEvento.objects.filter(Apodo=profile2, Estado='activo').values_list('EventoID', flat=True)
 
     # Check for common events
-    common_events = set(events_profile1).intersection(events_profile2)
+    common_events = list(set(events_profile1).intersection(events_profile2))
 
-    return common_events
+    return JsonResponse({'common_events': common_events})
 
 
 
@@ -125,26 +127,35 @@ class UpdateProfileView(APIView):
       return Response({'message': 'Perfil actualizado exitosamente'})
 
 
-
 class UpdateContactsView(APIView):
-   permission_classes = [IsAuthenticated]
-   
-   def post(self, request, *args, **kwargs):
-      usuario = request.data.get('username')
-      user = get_object_or_404(Perfil, user=usuario)
+    permission_classes = [IsAuthenticated]
 
-      # Obtener datos del perfil desde la solicitud
-      foto_avatar = request.data.get('FotoOAvatar', user.FotoOAvatar)
-      bio = request.data.get('bio', user.bio)
+    def post(self, request, *args, **kwargs):
+        usuario_emisor = request.data.get('Emisor')
+        usuario_remitente = request.data.get('Remitente')
+        estado_to_update = request.data.get('Estado')
+        
+        # Use Q objects to combine multiple conditions
+        Contacto = get_object_or_404(
+            Contactos, Q(Emisor=usuario_emisor) & Q(Remitente=usuario_remitente)
+        )
+        
+        # Get the user instance for the Emisor
+        emisor_instance = get_object_or_404(Perfil, user=usuario_emisor)
 
-      # Actualizar los campos del perfil
-      user.FotoOAvatar = foto_avatar or user.FotoOAvatar
-      user.bio = bio or user.bio
+        # Obtener datos del Contacto desde la solicitud
+        remitente_instance = get_object_or_404(Perfil, user=usuario_remitente)
 
-      # Guardar los cambios en la base de datos
-      user.save()
+        # Actualizar los campos del Contacto
+        Contacto.Emisor = emisor_instance or Contacto.Emisor
+        Contacto.Remitente = remitente_instance or Contacto.Remitente
+        
+        Contacto.Estado = estado_to_update or Contacto.Estado
 
-      return Response({'message': 'Perfil actualizado exitosamente'})
+        # Guardar los cambios en la base de datos
+        Contacto.save()
+
+        return Response({'message': 'Contactos actualizados exitosamente'})
 
 class LogInView(ObtainAuthToken):
    permission_classes = [AllowAny]
@@ -172,13 +183,12 @@ class SignUpView(CreateAPIView):
 
 
 class PerfilView(viewsets.ModelViewSet):
+   filter_backends = [SearchFilter]
+   search_fields = ['user__username']
    permission_classes = [IsAuthenticated]
    serializer_class = PerfilSerializer
    queryset = Perfil.objects.all()
    http_method_names = ['get', 'post']
-
-   
-
 
 class ContactosView(viewsets.ModelViewSet):
    serializer_class = ContactosSerializer
