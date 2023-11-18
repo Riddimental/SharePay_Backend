@@ -62,7 +62,7 @@ class Contactos(models.Model):
         super().save(*args, **kwargs)
 
     def __str__(self):
-        return f"{self.Emisor} - {self.Remitente}"
+        return f"{self.Emisor} invitó a {self.Remitente}"
 
     class Meta:
         verbose_name = 'Contacto'
