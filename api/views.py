@@ -131,25 +131,42 @@ class UpdateProfileView(APIView):
       return Response({'message': 'Perfil actualizado exitosamente'})
 
 class CreateContactsView(APIView):
-   permission_classes = [IsAuthenticated]
-   
-   def post(self, request, *args, **kwargs):
-      usuario_emisor = request.data.get('Emisor')
-      usuario_remitente = request.data.get('Remitente')
-      
-      # Verificar si el contacto ya existe
-      existing_contact = Contactos.objects.filter(Q(Emisor=usuario_emisor, Remitente=usuario_remitente)).first()
-      
-      if existing_contact:
-          return Response({'message': 'El contacto ya existe'}, status=status.HTTP_400_BAD_REQUEST)
-      
-      # Crear un nuevo contacto
-      emisor_instance = get_object_or_404(Perfil, user=usuario_emisor)
-      remitente_instance = get_object_or_404(Perfil, user=usuario_remitente)
-      
-      nuevo_contacto = Contactos.objects.create(Emisor=emisor_instance, Remitente=remitente_instance, Estado='Pendiente')
+    permission_classes = [IsAuthenticated]
 
-      return Response({'message': 'Contacto creado exitosamente'})
+    def post(self, request, *args, **kwargs):
+        usuario_emisor = request.data.get('Emisor')
+        usuario_remitente = request.data.get('Remitente')
+
+        # Verificar si el contacto ya existe
+        existing_contact = Contactos.objects.filter(Q(Emisor=usuario_emisor, Remitente=usuario_remitente)).first()
+
+        # Verifica si está solicitando a una persona que ya había solicitado al propietario
+        incoming_invitation = Contactos.objects.filter(Q(Emisor=usuario_remitente, Remitente=usuario_emisor)).first()
+
+        if existing_contact:
+            return Response({'message': 'El contacto ya existe'}, status=status.HTTP_400_BAD_REQUEST)
+
+        if incoming_invitation:
+            # Verificar que la solicitud esté pendiente antes de actualizar
+            if incoming_invitation.Estado == 'Pendiente':
+                # Actualizar el estado del contacto a 'Aceptada'
+                incoming_invitation.Estado = 'Aceptada'
+                incoming_invitation.save()
+
+                return Response({'message': 'Este usuario ya te había invitado, contacto agregado exitosamente'})
+             
+            # Si la solicitud ya estaba aceptada
+            if incoming_invitation.Estado == 'Aceptada':
+                return Response({'message': 'Este usuario ya fue creado anteriormente'}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Crear un nuevo contacto
+        emisor_instance = get_object_or_404(Perfil, user=usuario_emisor)
+        remitente_instance = get_object_or_404(Perfil, user=usuario_remitente)
+
+        nuevo_contacto = Contactos.objects.create(Emisor=emisor_instance, Remitente=remitente_instance, Estado='Pendiente')
+
+        return Response({'message': 'Contacto creado exitosamente'})
+
 
 class UpdateContactsView(APIView):
     permission_classes = [IsAuthenticated]
@@ -173,13 +190,31 @@ class UpdateContactsView(APIView):
         # Actualizar los campos del Contacto
         Contacto.Emisor = emisor_instance or Contacto.Emisor
         Contacto.Remitente = remitente_instance or Contacto.Remitente
-        
         Contacto.Estado = estado_to_update or Contacto.Estado
 
         # Guardar los cambios en la base de datos
         Contacto.save()
 
         return Response({'message': 'Contactos actualizados exitosamente'})
+    
+    
+class DeleteContactsView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, *args, **kwargs):
+        usuario_emisor = request.data.get('Emisor')
+        usuario_remitente = request.data.get('Remitente')
+        
+        # Verificar si el usuario actual es el propietario del contacto
+        contacto = get_object_or_404(
+            Contactos,
+            (Q(Emisor=usuario_emisor, Remitente=usuario_remitente) | Q(Emisor=usuario_remitente, Remitente=usuario_emisor))
+        )
+
+        # Eliminar el contacto de la base de datos
+        contacto.delete()
+
+        return Response({'message': 'Contacto eliminado exitosamente'})
 
 class LogInView(ObtainAuthToken):
    permission_classes = [AllowAny]
