@@ -34,8 +34,8 @@ SECRET_KEY = 'django-insecure-)+96l_8do3)qedx$3&d$xz&q7x0=5tnkpr8l^^mt2p=(1+=-i&
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['localhost:3000','127.0.0.1', '10.84.23.234']
-
+#ALLOWED_HOSTS = ['localhost','127.0.0.1', '10.84.23.234','10.84.19.151']
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -162,7 +162,8 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
-STATIC_URL = 'static/'
+STATIC_URL = '/static/'
+STATIC_ROOT = '/home/riddimental/SharePay_Backend/static/'
 MEDIA_URL= 'media/'
 
 # Default primary key field type
@@ -171,7 +172,9 @@ MEDIA_URL= 'media/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 #CORS auth
-CORS_ALLOWED_ORIGINS = ["http://localhost:3000"]
+CORS_ALLOWED_ORIGINS = ["http://localhost:3000","http://127.0.0.1:3000", "http://10.84.23.234:3000", "http://10.84.19.151:3000"]
+#CORS_ALLOWED_ORIGINS = ['*']
+
 CORS_ALLOW_CREDENTIALS = True
 
 REST_FRAMEWORK = {
