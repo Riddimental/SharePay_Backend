@@ -91,7 +91,20 @@ class Eventos(models.Model):
         default='otro'  # otro por defecto
     )
     
-    FotoOAvatar = models.CharField(max_length=225)
+    OPCIONES_FOTO_AVATAR = [
+        ('https://w7.pngwing.com/pngs/980/935/png-transparent-clapperboard-architecture-sports-activities-text-fashion-logo-thumbnail.png', "avatar 1"),
+        ('https://png.pngtree.com/png-clipart/20220628/original/pngtree-food-logo-png-image_8239850.png', "avatar 2"),
+        ('https://logo.com/image-cdn/images/kts928pd/production/cbe600c9fc90afe063527b300816e390f57a8915-349x346.png', "avatar 3"),
+        ('https://assets.stickpng.com/images/590605810cbeef0acff9a63c.png', "avatar 4"),
+        ('https://logowik.com/content/uploads/images/google-shopping.jpg', "avatar 5"),
+        ('https://png.pngtree.com/png-clipart/20230921/original/pngtree-swimming-logo-logo-pool-white-vector-png-image_12645079.png', "avatar 6")
+    ]
+
+    FotoOAvatar = models.CharField(
+        max_length=255,
+        choices=OPCIONES_FOTO_AVATAR,
+        default='https://static.vecteezy.com/system/resources/previews/009/662/780/original/people-user-team-transparent-free-png.png'
+    )
     
     class Meta:
       verbose_name='Evento'

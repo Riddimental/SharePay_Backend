@@ -34,7 +34,7 @@ SECRET_KEY = 'django-insecure-)+96l_8do3)qedx$3&d$xz&q7x0=5tnkpr8l^^mt2p=(1+=-i&
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-#ALLOWED_HOSTS = ['localhost','127.0.0.1', '10.84.23.234','10.84.19.151']
+#ALLOWED_HOSTS = ['localhost','127.0.0.1', '10.84.23.234','10.84.19.151','riddimental.pythonanywhere.com']
 ALLOWED_HOSTS = ['*']
 
 
@@ -172,7 +172,7 @@ MEDIA_URL= 'media/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 #CORS auth
-CORS_ALLOWED_ORIGINS = ["http://localhost:3000","http://127.0.0.1:3000", "http://10.84.23.234:3000", "http://10.84.19.151:3000"]
+CORS_ALLOWED_ORIGINS = ["http://localhost:3000","http://127.0.0.1:3000", "http://10.84.23.234:3000", "http://10.84.19.151:3000", "https://riddimental.pythonanywhere.com", "https://share-pay-app-web.vercel.app"]
 #CORS_ALLOWED_ORIGINS = ['*']
 
 CORS_ALLOW_CREDENTIALS = True

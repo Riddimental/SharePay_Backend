@@ -46,6 +46,7 @@ def get_user_contacts(request):
     # Serializa los datos si es necesario y devuelve una respuesta JSON
     data = [{
        'emisor': {
+            'id' : contacto.Emisor.user.id,
             'username': contacto.Emisor.user.username,
             'avatar': contacto.Emisor.FotoOAvatar,
         },
@@ -56,6 +57,31 @@ def get_user_contacts(request):
         'estado': contacto.Estado
     } for contacto in user_contacts]
     return JsonResponse({'user_contacts': data})
+
+def get_user_events(request):
+    # Obtén el nombre de usuario desde la solicitud GET
+    username = request.GET.get('username')
+
+    # Obtiene el objeto Perfil asociado al nombre de usuario proporcionado
+    creador = get_object_or_404(Perfil, user=username)
+    
+    # Obtiene el objeto User asociado al nombre de usuario proporcionado
+    user = get_object_or_404(User, username=username)
+
+    # Obtiene todos los eventos del usuario
+    user_events = Eventos.objects.all()
+
+    # Serializa los datos y devuelve una respuesta JSON
+    data = [{
+        'id': evento.EventoID,
+        'creador': evento.Creador.user.username,
+        'nombre': evento.Nombre,
+        'descripcion': evento.Descripcion,
+        'tipo': evento.Tipo,
+        'avatar': evento.FotoOAvatar,
+    } for evento in user_events]
+    return JsonResponse({'user_events': data})
+
 
 def get_user(request):
     username = request.GET.get('username')
@@ -168,6 +194,27 @@ class CreateContactsView(APIView):
         return Response({'message': 'Contacto creado exitosamente'})
 
 
+'''class CreateEventsView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, *args, **kwargs):
+        evento_creador = request.data.get('username')
+        evento_nombre = request.data.get('evento')
+        evento_descripcion = request.data.get('descripcion')
+        evento_tipo = request.data.get('tipo')
+        evento_foto = request.data.get('foto')
+        
+
+        # Verificar si el contacto ya existe
+        existing_event = Eventos.objects.filter(Q(Creador=evento_creador, Nombre=evento_nombre)).first()
+
+        if existing_event:
+            return Response({'message': 'El evento ya existe'}, status=status.HTTP_400_BAD_REQUEST)
+
+        nuevo_evento = Eventos.objects.create(Creador=evento_creador, Nombre=evento_nombre, Descripcion=evento_descripcion, Tipo=evento_tipo, FotoOAvatar=evento_foto)
+
+        return Response({'message': 'Evento creado exitosamente'})
+'''
 class UpdateContactsView(APIView):
     permission_classes = [IsAuthenticated]
 

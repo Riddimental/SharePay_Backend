@@ -27,11 +27,13 @@ urlpatterns = [
    path('generate_token/', tokenviews.obtain_auth_token),
    path('get_user/', views.get_user, name='get user information'),
    path('get_contacts/', views.get_user_contacts, name='get contacts information'),
+   path('get_events/', views.get_user_events, name='get events information'),
    path('have_common_events/', views.have_common_events, name='get list of common events'),
    path('update_user/', views.UpdateUserView.as_view(), name='update user information'),
    path('update_contactos/', views.UpdateContactsView.as_view(), name='update contacts information'),
    path('delete_contactos/', views.DeleteContactsView.as_view(), name='update contacts information'),
    path('create_contactos/', views.CreateContactsView.as_view(), name='Create contacts'),
+   #path('create_events/', views.CreateEventsView.as_view(), name='Create events'),
    path('update_perfil/', views.UpdateProfileView.as_view(), name='update perfil'),
 ]
 
