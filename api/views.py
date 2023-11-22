@@ -31,8 +31,6 @@ def have_common_events(request):
 
     return JsonResponse({'common_events': common_events})
 
-
-
 def get_user_contacts(request):
     # Obtén el nombre de usuario desde la solicitud GET
     username = request.GET.get('username')
@@ -61,27 +59,20 @@ def get_user_contacts(request):
 def get_user_events(request):
     # Obtén el nombre de usuario desde la solicitud GET
     username = request.GET.get('username')
-
-    # Obtiene el objeto Perfil asociado al nombre de usuario proporcionado
-    creador = get_object_or_404(Perfil, user=username)
     
-    # Obtiene el objeto User asociado al nombre de usuario proporcionado
-    user = get_object_or_404(User, username=username)
+    # obtiene los eventos en los que el usuario esta participando
+    participations = ParticipantesEvento.objects.filter(Apodo=username)
+    
 
     # Obtiene todos los eventos del usuario
-    user_events = Eventos.objects.all()
+    events = Eventos.objects.all()
 
     # Serializa los datos y devuelve una respuesta JSON
     data = [{
-        'id': evento.EventoID,
-        'creador': evento.Creador.user.username,
-        'nombre': evento.Nombre,
-        'descripcion': evento.Descripcion,
-        'tipo': evento.Tipo,
-        'avatar': evento.FotoOAvatar,
-    } for evento in user_events]
+        'Apodo': participant.Apodo,
+        'EventoID': participant.Nom
+    } for participant in participations]
     return JsonResponse({'user_events': data})
-
 
 def get_user(request):
     username = request.GET.get('username')
@@ -99,7 +90,6 @@ def get_user(request):
     user_data = {
         'user_id': user.id,
         'username': user.username,
-        'password': user.password,  # Ten en cuenta que devolver la contraseña no es seguro en un entorno de producción
         'email': user.email,
         'first_name': user.first_name,
         'last_name': user.last_name,
@@ -107,6 +97,33 @@ def get_user(request):
     }
 
     return JsonResponse(user_data)
+
+def get_participants(request):
+    username = request.GET.get('username')
+
+    participants = ParticipantesEvento.objects.filter(Apodo__user__username=username)
+
+    if not participants.exists():
+        return JsonResponse({'error': 'No se encontraron participantes con ese apodo'}, status=404)
+
+    participants_data = [
+        {
+            'Apodo': participant.Apodo.user.username,
+            'Evento': {
+                'EventoID': participant.EventoID.EventoID,
+                'Nombre': participant.EventoID.Nombre,
+                'Descripcion': participant.EventoID.Descripcion,
+                'Avatar': participant.EventoID.FotoOAvatar,
+                'Tipo': participant.EventoID.Tipo,
+                # Agrega otros campos del evento que desees incluir
+            },
+            'Estado': participant.Estado
+        }
+        for participant in participants
+    ]
+
+    return JsonResponse({'participants': participants_data}, safe=False)
+
 
 class UpdateUserView(APIView):
    permission_classes = [IsAuthenticated]
@@ -156,65 +173,34 @@ class UpdateProfileView(APIView):
 
       return Response({'message': 'Perfil actualizado exitosamente'})
 
-class CreateContactsView(APIView):
+class CreateEventsView(APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request, *args, **kwargs):
-        usuario_emisor = request.data.get('Emisor')
-        usuario_remitente = request.data.get('Remitente')
-
-        # Verificar si el contacto ya existe
-        existing_contact = Contactos.objects.filter(Q(Emisor=usuario_emisor, Remitente=usuario_remitente)).first()
-
-        # Verifica si está solicitando a una persona que ya había solicitado al propietario
-        incoming_invitation = Contactos.objects.filter(Q(Emisor=usuario_remitente, Remitente=usuario_emisor)).first()
-
-        if existing_contact:
-            return Response({'message': 'El contacto ya existe'}, status=status.HTTP_400_BAD_REQUEST)
-
-        if incoming_invitation:
-            # Verificar que la solicitud esté pendiente antes de actualizar
-            if incoming_invitation.Estado == 'Pendiente':
-                # Actualizar el estado del contacto a 'Aceptada'
-                incoming_invitation.Estado = 'Aceptada'
-                incoming_invitation.save()
-
-                return Response({'message': 'Este usuario ya te había invitado, contacto agregado exitosamente'})
-             
-            # Si la solicitud ya estaba aceptada
-            if incoming_invitation.Estado == 'Aceptada':
-                return Response({'message': 'Este usuario ya fue creado anteriormente'}, status=status.HTTP_400_BAD_REQUEST)
-
-        # Crear un nuevo contacto
-        emisor_instance = get_object_or_404(Perfil, user=usuario_emisor)
-        remitente_instance = get_object_or_404(Perfil, user=usuario_remitente)
-
-        nuevo_contacto = Contactos.objects.create(Emisor=emisor_instance, Remitente=remitente_instance, Estado='Pendiente')
-
-        return Response({'message': 'Contacto creado exitosamente'})
-
-
-'''class CreateEventsView(APIView):
-    permission_classes = [IsAuthenticated]
-
-    def post(self, request, *args, **kwargs):
-        evento_creador = request.data.get('username')
+        # Obtén los datos de la solicitud
+        username = request.data.get('username')
         evento_nombre = request.data.get('evento')
-        evento_descripcion = request.data.get('descripcion')
-        evento_tipo = request.data.get('tipo')
-        evento_foto = request.data.get('foto')
-        
+        evento_descripcion = request.data.get('descripcion', '')  # Podría ser opcional
+        evento_tipo = request.data.get('tipo', '')  # Podría ser opcional
+        evento_foto = request.data.get('avatar', '')  # Podría ser opcional
 
-        # Verificar si el contacto ya existe
-        existing_event = Eventos.objects.filter(Q(Creador=evento_creador, Nombre=evento_nombre)).first()
+        # Verifica si el evento ya existe para el creador dado
+        existing_event = Eventos.objects.filter(Q(Creador=username, Nombre=evento_nombre)).first()
 
         if existing_event:
-            return Response({'message': 'El evento ya existe'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'error': 'El evento ya existe para este creador'}, status=status.HTTP_400_BAD_REQUEST)
 
-        nuevo_evento = Eventos.objects.create(Creador=evento_creador, Nombre=evento_nombre, Descripcion=evento_descripcion, Tipo=evento_tipo, FotoOAvatar=evento_foto)
+        # Crea el nuevo evento
+        nuevo_evento = Eventos.objects.create(
+            Creador=username,
+            Nombre=evento_nombre,
+            Descripcion=evento_descripcion,
+            Tipo=evento_tipo,
+            FotoOAvatar=evento_foto
+        )
 
-        return Response({'message': 'Evento creado exitosamente'})
-'''
+        return Response({'message': 'Evento creado exitosamente'}, status=status.HTTP_201_CREATED)
+
 class UpdateContactsView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -304,9 +290,63 @@ class EventosView(viewsets.ModelViewSet):
    serializer_class = EventosSerializer
    queryset = Eventos.objects.all()
    
+class CreateContactsView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, *args, **kwargs):
+        usuario_emisor = request.data.get('Emisor')
+        usuario_remitente = request.data.get('Remitente')
+
+        # Verificar si el contacto ya existe
+        existing_contact = Contactos.objects.filter(
+            (Q(Emisor=usuario_emisor, Remitente=usuario_remitente))
+        ).first()
+
+        if existing_contact:
+            return Response({'message': 'El contacto ya existe'}, status=status.HTTP_400_BAD_REQUEST)
+
+        
+        # Verificar si el contacto inverso ya existe
+        reverse_contact_exists = Contactos.objects.filter(
+            Q(Emisor=usuario_remitente, Remitente=usuario_emisor)
+        ).exists()
+
+        if reverse_contact_exists:
+            return Response({'message': 'El contacto inverso ya existe'}, status=status.HTTP_400_BAD_REQUEST)
+
+
+
+        # Crear un nuevo contacto
+        emisor_instance = get_object_or_404(Perfil, user=usuario_emisor)
+        remitente_instance = get_object_or_404(Perfil, user=usuario_remitente)
+
+        nuevo_contacto = Contactos.objects.create(Emisor=emisor_instance, Remitente=remitente_instance, Estado='Pendiente')
+
+        return Response({'message': 'Contacto creado exitosamente'})
+
 class ParticipantesEventoView(viewsets.ModelViewSet):
-   serializer_class = ParticipantesEventoSerializer
-   queryset = ParticipantesEvento.objects.all()
+    permission_classes = [IsAuthenticated]
+    serializer_class = ParticipantesEventoSerializer
+    queryset = ParticipantesEvento.objects.all()  # Ajusta esto según tus necesidades
+
+    def create(self, request, *args, **kwargs):
+        participant_apodo = request.data.get('Apodo')
+        participant_eventoID = request.data.get('EventoID')
+
+        # Verificar si el participante ya existe
+        existing_participant = ParticipantesEvento.objects.filter(Q(Apodo=participant_apodo, EventoID=participant_eventoID)).first()
+
+        if existing_participant:
+            return Response({'message': 'El usuario ya estaba participando en el evento.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Crear un nuevo participante
+        participante = get_object_or_404(Perfil, user=participant_apodo)
+        evento_id = get_object_or_404(Eventos, EventoID=participant_eventoID)
+
+        nuevo_participante = ParticipantesEvento.objects.create(Apodo=participante, EventoID=evento_id)
+
+        serializer = self.get_serializer(nuevo_participante)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
    
 class ActividadesView(viewsets.ModelViewSet):
    serializer_class = ActividadesSerializer

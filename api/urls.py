@@ -10,7 +10,6 @@ router = routers.DefaultRouter()
 router.register(r'Perfiles', views.PerfilView , 'Perfiles')
 router.register(r'Contactos', views.ContactosView, 'Contactos')
 router.register(r'Eventos', views.EventosView, 'Eventos')
-router.register(r'ParticipantesEvento', views.ParticipantesEventoView, 'ParticipantesEvento')
 router.register(r'Actividades', views.ActividadesView, 'Actividades')
 router.register(r'ParticipantesActividad', views.ParticipantesActividadView, 'ParticipantesActividad')
 router.register(r'Saldos', views.SaldosView, 'Saldos')
@@ -27,7 +26,8 @@ urlpatterns = [
    path('generate_token/', tokenviews.obtain_auth_token),
    path('get_user/', views.get_user, name='get user information'),
    path('get_contacts/', views.get_user_contacts, name='get contacts information'),
-   path('get_events/', views.get_user_events, name='get events information'),
+   path('get_participants/', views.get_participants, name='get participants information'),
+   path('get_all_events/', views.get_user_events, name='get events information'),
    path('have_common_events/', views.have_common_events, name='get list of common events'),
    path('update_user/', views.UpdateUserView.as_view(), name='update user information'),
    path('update_contactos/', views.UpdateContactsView.as_view(), name='update contacts information'),

@@ -1,7 +1,8 @@
 from django.contrib.auth.models import User
 from django.db import models
+from django.db.models import Q
 from django.core.exceptions import ValidationError
-from django.db.models.signals import post_save
+from django.db.models.signals import post_save, pre_save
 from django.contrib.auth.hashers import make_password, check_password
 from django.dispatch import receiver
 
@@ -48,7 +49,7 @@ class Contactos(models.Model):
     ContactID = models.AutoField(primary_key=True)
     Emisor = models.ForeignKey('Perfil', on_delete=models.CASCADE, to_field="user", related_name='Contacto_emisor')
     Remitente = models.ForeignKey('Perfil', on_delete=models.CASCADE, to_field="user", related_name='Contacto_remitente')
-    ESTADO_CHOICES = [('Aceptada', 'Aceptada'), ('Rechazada', 'Rechazada'), ('Pendiente', 'Pendiente'), ('Eliminado', 'Eliminado')]#Rechazada representa el fin del contacto, cuando se elimina un contacto, este atributo se pone en Rechazada aunque hubiera estado aceptada antes.
+    ESTADO_CHOICES = [('Aceptada', 'Aceptada'), ('Rechazada', 'Rechazada'), ('Pendiente', 'Pendiente'), ('Eliminado', 'Eliminado')]
     Estado = models.CharField(max_length=10, choices=ESTADO_CHOICES, default='Pendiente')
 
     def clean(self):
@@ -56,6 +57,14 @@ class Contactos(models.Model):
             raise ValidationError("Los campos Emisor y Remitente no pueden estar en blanco.")
         if self.Emisor_id == self.Remitente_id:
             raise ValidationError("El Emisor y el Remitente no pueden ser el mismo.")
+
+        # Verificar si el contacto inverso ya existe
+        reverse_contact_exists = Contactos.objects.filter(
+            Q(Emisor=self.Remitente, Remitente=self.Emisor)
+        ).exists()
+
+        if reverse_contact_exists:
+            raise ValidationError("El contacto inverso ya existe.")
 
     def save(self, *args, **kwargs):
         self.full_clean()
@@ -106,11 +115,39 @@ class Eventos(models.Model):
         default='https://static.vecteezy.com/system/resources/previews/009/662/780/original/people-user-team-transparent-free-png.png'
     )
     
+    def __str__(self):
+        return f"{self.Creador} creó el evento {self.Nombre}"
     class Meta:
       verbose_name='Evento'
       verbose_name_plural='Eventos'
       ordering=['EventoID']
+      
+    def save(self, *args, **kwargs):
+        # Guardar el evento
+        super().save(*args, **kwargs)
 
+        # Verificar si el participante ya existe
+        participant_exists = ParticipantesEvento.objects.filter(
+            Apodo=self.Creador,
+            EventoID=self
+        ).exists()
+
+        if not participant_exists:
+            # Si no existe, crear el participante
+            ParticipantesEvento.objects.create(
+                Apodo=self.Creador,
+                EventoID=self,
+                Estado='activo'
+            )
+
+@receiver(post_save, sender=Eventos)
+def create_participant(sender, instance, created, **kwargs):
+    if created:
+        ParticipantesEvento.objects.create(
+            Apodo=instance.Creador,
+            EventoID=instance,
+            Estado='activo'
+        )
 class ParticipantesEvento(models.Model):
     ParticipanteID = models.AutoField(primary_key=True)
     Apodo = models.ForeignKey('Perfil', on_delete=models.CASCADE, to_field="user", related_name='Eventos_participante')
@@ -131,6 +168,9 @@ class ParticipantesEvento(models.Model):
       verbose_name='Participante del evento'
       verbose_name_plural='Participantes del evento'
       ordering=['ParticipanteID']
+      
+    def __str__(self):
+        return f"{self.Apodo} participará en el evento {self.EventoID.Nombre}"
 
 class Actividades(models.Model):
     ActividadID = models.AutoField(primary_key=True)
