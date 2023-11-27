@@ -33,7 +33,7 @@ urlpatterns = [
    path('update_contactos/', views.UpdateContactsView.as_view(), name='update contacts information'),
    path('delete_contactos/', views.DeleteContactsView.as_view(), name='update contacts information'),
    path('create_contactos/', views.CreateContactsView.as_view(), name='Create contacts'),
-   #path('create_events/', views.CreateEventsView.as_view(), name='Create events'),
+   path('create_events/', views.CreateEventsView.as_view(), name='Create events'),
    path('update_perfil/', views.UpdateProfileView.as_view(), name='update perfil'),
 ]
 

@@ -112,7 +112,7 @@ class Eventos(models.Model):
     FotoOAvatar = models.CharField(
         max_length=255,
         choices=OPCIONES_FOTO_AVATAR,
-        default='https://static.vecteezy.com/system/resources/previews/009/662/780/original/people-user-team-transparent-free-png.png'
+        default='https://assets.stickpng.com/images/590605810cbeef0acff9a63c.png'
     )
     
     def __str__(self):
