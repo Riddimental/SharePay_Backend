@@ -115,7 +115,7 @@ def get_participants(request):
                 'Descripcion': participant.EventoID.Descripcion,
                 'Avatar': participant.EventoID.FotoOAvatar,
                 'Tipo': participant.EventoID.Tipo,
-                # Agrega otros campos del evento que desees incluir
+                'Creador' : participant.EventoID.Creador.user.username,
             },
             'Estado': participant.Estado
         }
@@ -285,6 +285,30 @@ class UpdateContactsView(APIView):
 
         return Response({'message': 'Contactos actualizados exitosamente'})
     
+
+class UpdateEventView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, *args, **kwargs):
+        evento_id = request.data.get('id')
+        evento_nombre = request.data.get('nombre')
+        evento_descripcion = request.data.get('descripcion')
+        evento_tipo = request.data.get('tipo')
+        
+        # Use Q objects to combine multiple conditions
+        Evento = get_object_or_404(
+            Eventos, Q(EventoID=evento_id)
+        )
+
+        # Actualizar los campos del Contacto
+        Evento.Nombre = evento_nombre or Evento.Nombre
+        Evento.Descripcion = evento_descripcion or Evento.Descripcion
+        Evento.Tipo = evento_tipo or Evento.Tipo
+
+        # Guardar los cambios en la base de datos
+        Evento.save()
+
+        return Response({'message': 'Evento actualizado exitosamente'})
     
 class DeleteContactsView(APIView):
     permission_classes = [IsAuthenticated]
@@ -303,6 +327,20 @@ class DeleteContactsView(APIView):
         contacto.delete()
 
         return Response({'message': 'Contacto eliminado exitosamente'})
+    
+class DeleteEventView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, *args, **kwargs):
+        evento_id = request.data.get('eventID')
+        
+        # Verificar si el usuario actual es el propietario del contacto
+        evento = get_object_or_404(Eventos,(Q(EventoID=evento_id)))
+
+        # Eliminar el contacto de la base de datos
+        evento.delete()
+
+        return Response({'message': 'Evento eliminado exitosamente'})
 
 class LogInView(ObtainAuthToken):
    permission_classes = [AllowAny]
