@@ -176,6 +176,7 @@ class Actividades(models.Model):
     ActividadID = models.AutoField(primary_key=True)
     EventoID = models.ForeignKey(Eventos, on_delete=models.CASCADE)
     Creador = models.ForeignKey('Perfil', on_delete=models.CASCADE, to_field="user", related_name='Actividad_creador')
+    Nombre = models.CharField(max_length=32)
     Descripcion = models.TextField()
     ValorTotal = models.DecimalField(max_digits=10, decimal_places=2)
     
@@ -183,6 +184,9 @@ class Actividades(models.Model):
       verbose_name='Actividad'
       verbose_name_plural='Actividades'
       ordering=['ActividadID']
+      
+    def __str__(self):
+        return f"{self.Creador} creó la actividad '{self.Nombre}' en el evento '{self.EventoID.Nombre}'"
 
 class ParticipantesActividad(models.Model):
     ActividadParticipanteID = models.AutoField(primary_key=True)

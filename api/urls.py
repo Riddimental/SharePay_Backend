@@ -27,6 +27,7 @@ urlpatterns = [
    path('get_user/', views.get_user, name='get user information'),
    path('get_contacts/', views.get_user_contacts, name='get contacts information'),
    path('get_participants/', views.get_participants, name='get participants information'),
+   path('get_event_activities/', views.get_event_activities, name='get activities from a selected event'),
    path('get_all_events/', views.get_user_events, name='get events information'),
    path('have_common_events/', views.have_common_events, name='get list of common events'),
    path('update_user/', views.UpdateUserView.as_view(), name='update user information'),
