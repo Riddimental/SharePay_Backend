@@ -39,7 +39,7 @@ def get_user_contacts(request):
     user = get_object_or_404(User, username=username)
 
     # Obtiene todos los contactos del usuario
-    user_contacts = Contactos.objects.all()
+    user_contacts = Contactos.objects.filter(Q(Emisor=username) | Q(Remitente=username))
 
     # Serializa los datos si es necesario y devuelve una respuesta JSON
     data = [{
@@ -70,7 +70,7 @@ def get_user_events(request):
     # Serializa los datos y devuelve una respuesta JSON
     data = [{
         'Apodo': participant.Apodo,
-        'EventoID': participant.Nom
+        'EventoID': participant.EventoID
     } for participant in participations]
     return JsonResponse({'user_events': data})
 
@@ -98,7 +98,28 @@ def get_user(request):
 
     return JsonResponse(user_data)
 
-def get_participants(request):
+def get_event_activities(request):
+    #obtengo el nombre del evento del request
+    evento_ID = request.GET.get('eventID')
+    #obtengo las actividades relacionadas al evento que tenga el mismo nombre que el proporcionado
+    actividades_evento = Actividades.objects.filter(EventoID_id=evento_ID)
+    
+    if not actividades_evento.exists():
+        return JsonResponse({'alerta': 'No se encontraron actividades para ese evento'})
+    
+    activities_data = [
+        {
+            'Creador': activity.Creador.user.username,
+            'Nombre': activity.Nombre,
+            'Descripcion': activity.Descripcion,
+            'Valor': str(activity.ValorTotal),
+        }
+        for activity in actividades_evento
+    ]
+    
+    return JsonResponse({'activities': activities_data}, safe=False)
+
+def get_my_events(request):
     username = request.GET.get('username')
 
     participants = ParticipantesEvento.objects.filter(Apodo__user__username=username)
@@ -124,26 +145,28 @@ def get_participants(request):
 
     return JsonResponse({'participants': participants_data}, safe=False)
 
-def get_event_activities(request):
+def get_event_participants(request):
     #obtengo el nombre del evento del request
-    evento_ID = request.GET.get('eventID')
-    #obtengo las actividades relacionadas al evento que tenga el mismo nombre que el proporcionado
-    actividades_evento = Actividades.objects.filter(EventoID_id=evento_ID)
+    evento_ID = request.GET.get('eventoID')
+    print(evento_ID)
+    #obtengo los participantes relacionadas al evento
+    participantes_evento = ParticipantesEvento.objects.filter((Q(EventoID_id=evento_ID, Estado='activo')))
+    print('el dato es',participantes_evento)
+    if not participantes_evento.exists():
+        return JsonResponse({'alerta': 'No hay participantes ese evento'})
     
-    if not actividades_evento.exists():
-        return JsonResponse({'alerta': 'No se encontraron actividades para ese evento'})
-    
-    activities_data = [
+    participants_data = [
         {
-            'Creador': activity.Creador.user.username,
-            'Nombre': activity.Nombre,
-            'Descripcion': activity.Descripcion,
-            'Valor': str(activity.ValorTotal),
+            'Apodo': participant.Apodo.user.username,
+            'Avatar_participante': participant.Apodo.FotoOAvatar,
+            'EventoID': participant.EventoID.EventoID,
+            'Estado': participant.Estado,
         }
-        for activity in actividades_evento
+        for participant in participantes_evento
     ]
     
-    return JsonResponse({'activities': activities_data}, safe=False)
+    return JsonResponse({'participantes': participants_data}, safe=False)
+
 class UpdateUserView(APIView):
    permission_classes = [IsAuthenticated]
 
@@ -226,6 +249,41 @@ class CreateContactsView(APIView):
 
         return Response({'message': 'Contacto creado exitosamente'})
 
+class CreateEventParticipantsView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, *args, **kwargs):
+        participante_apodo = request.data.get('Apodo')
+        participante_evento = request.data.get('EventoID')
+        instance_evento = get_object_or_404(Eventos, EventoID=participante_evento)
+        participante_estado = request.data.get('Estado')
+
+        # Verificar si el participante ya existe
+        existing_participant = ParticipantesEvento.objects.filter(
+            (Q(Apodo=participante_apodo, EventoID=participante_evento, Estado='Activo'))
+        ).first()
+        
+        # Verificar si el participante ya fue invitado
+        existing_invitation = ParticipantesEvento.objects.filter(
+            (Q(Apodo=participante_apodo, EventoID=participante_evento, Estado='Pendiente'))
+        ).first()
+
+        if existing_participant:
+            return Response({'message': 'El contacto ya esta participando en el evento.'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        if existing_invitation:
+            return Response({'message': 'El contacto ya fue invitado al evento.'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        # Crear un nuevo participante para el evento
+        participante = get_object_or_404(Perfil, user=participante_apodo)
+
+        nuevo_participante = ParticipantesEvento.objects.create(
+            Apodo=participante,
+            EventoID=instance_evento,
+            Estado=participante_estado
+            )
+
+        return Response({'message': 'Invitacion enviada exitosamente'})
 
 class CreateEventsView(APIView):
     permission_classes = [IsAuthenticated]
@@ -255,6 +313,36 @@ class CreateEventsView(APIView):
         )
 
         return Response({'message': 'Evento creado exitosamente'}, status=status.HTTP_201_CREATED)
+
+class CreateActivitiesView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, *args, **kwargs):
+        # Obtén los datos de la solicitud
+        eventoID = request.data.get('EventoID')
+        actividad_eventoID = get_object_or_404(Eventos, EventoID=eventoID)
+        creador = request.data.get('Creador')
+        actividad_creadorID = get_object_or_404(Perfil, user=creador)
+        actividad_nombre = request.data.get('Nombre')
+        actividad_descripcion = request.data.get('Descripcion')
+        actividad_valorTotal = request.data.get('ValorTotal')
+
+        # Verifica si el evento ya existe para el evento dado
+        existing_activity = Actividades.objects.filter(Q(Nombre=actividad_nombre)).first()
+
+        if existing_activity:
+            return Response({'error': 'Esta actividad ya existe para el evento'}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Crea el nuevo evento
+        nueva_actividad = Actividades.objects.create(
+            EventoID=actividad_eventoID,
+            Nombre=actividad_nombre,
+            Descripcion=actividad_descripcion,
+            ValorTotal=actividad_valorTotal,
+            Creador=actividad_creadorID,
+        )
+
+        return Response({'message': 'Actividad creada exitosamente'}, status=status.HTTP_201_CREATED)
 
 class UpdateContactsView(APIView):
     permission_classes = [IsAuthenticated]

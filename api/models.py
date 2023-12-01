@@ -154,6 +154,7 @@ class ParticipantesEvento(models.Model):
     EventoID = models.ForeignKey(Eventos, on_delete=models.CASCADE)
     
     ESTADO_CHOICES = [
+        ('pendiente', 'Pendiente'),
         ('activo', 'Activo'),
         ('inactivo', 'Inactivo'),
     ]
@@ -161,7 +162,7 @@ class ParticipantesEvento(models.Model):
     Estado = models.CharField(
         max_length=10,
         choices=ESTADO_CHOICES,
-        default='activo'  # activo por defecto
+        default='Pendiente'  # pendiente por defecto, hasta que el usuario acepte
     )
     
     class Meta:
@@ -170,14 +171,15 @@ class ParticipantesEvento(models.Model):
       ordering=['ParticipanteID']
       
     def __str__(self):
-        return f"{self.Apodo} participará en el evento {self.EventoID.Nombre}"
+        return f"{self.Apodo} invitado al evento {self.EventoID.Nombre}"
 
 class Actividades(models.Model):
     ActividadID = models.AutoField(primary_key=True)
     EventoID = models.ForeignKey(Eventos, on_delete=models.CASCADE)
     Nombre = models.CharField(max_length=32)
     Descripcion = models.TextField()
-    ValorTotal = models.DecimalField(max_digits=10, decimal_places=2)
+    ValorTotal = models.DecimalField(max_digits=30, decimal_places=2)
+    Creador = models.ForeignKey('Perfil', on_delete=models.CASCADE, to_field="user", related_name='Actividad_creador')
     
     class Meta:
       verbose_name='Actividad'
