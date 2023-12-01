@@ -145,6 +145,7 @@ def get_my_events(request):
 
     return JsonResponse({'participants': participants_data}, safe=False)
 
+
 def get_event_participants(request):
     #obtengo el nombre del evento del request
     evento_ID = request.GET.get('eventoID')
@@ -230,14 +231,18 @@ class CreateContactsView(APIView):
         if existing_contact:
             return Response({'message': 'El contacto ya existe'}, status=status.HTTP_400_BAD_REQUEST)
 
-        
+
+
         # Verificar si el contacto inverso ya existe
         reverse_contact_exists = Contactos.objects.filter(
             Q(Emisor=usuario_remitente, Remitente=usuario_emisor)
         ).exists()
 
         if reverse_contact_exists:
-            return Response({'message': 'El contacto inverso ya existe'}, status=status.HTTP_400_BAD_REQUEST)
+            contacto_inverso = Contactos.objects.get(Emisor=usuario_remitente, Remitente=usuario_emisor)
+            contacto_inverso.Estado = 'Aceptada'
+            contacto_inverso.save()
+            return Response({'message': 'El contacto inverso ya existe mi so'}, status=status.HTTP_400_BAD_REQUEST)
 
 
 
@@ -268,16 +273,14 @@ class CreateEventParticipantsView(APIView):
             (Q(Apodo=participante_apodo, EventoID=participante_evento, Estado='Pendiente'))
         ).first()
 
-        if existing_participant:
-            return Response({'message': 'El contacto ya esta participando en el evento.'}, status=status.HTTP_400_BAD_REQUEST)
         
-        if existing_invitation:
+        if (existing_invitation | existing_participant):
             return Response({'message': 'El contacto ya fue invitado al evento.'}, status=status.HTTP_400_BAD_REQUEST)
         
         # Crear un nuevo participante para el evento
         participante = get_object_or_404(Perfil, user=participante_apodo)
 
-        nuevo_participante = ParticipantesEvento.objects.create(
+        nuevo_participante = ParticipantesEvento.objects.get_or_create(
             Apodo=participante,
             EventoID=instance_evento,
             Estado=participante_estado
@@ -373,7 +376,6 @@ class UpdateContactsView(APIView):
 
         return Response({'message': 'Contactos actualizados exitosamente'})
     
-
 class UpdateEventView(APIView):
     permission_classes = [IsAuthenticated]
 
