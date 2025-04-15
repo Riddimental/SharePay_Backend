@@ -1,65 +1,96 @@
 # SharePay Backend
 
-Este es el repositorio del backend de SharePay App, una aplicación de gestión de eventos.
+**SharePay** is a web application for event management, allowing users to create events, manage attendees, send notifications, and track activity. This repository contains the backend API built with Django.
 
-## Prerequisitos
+## Features
 
-Asegúrate de tener instalados los siguientes requisitos antes de comenzar:
+- Event creation and user management  
+- Real-time notifications and activity tracking  
+- Secure authentication and authorization  
+- RESTful API endpoints ready for integration with the SharePay frontend
 
-- Python 3.10 o superior
-- Django 4.2.5 o superior
-- Virtualenv 20.24 o superior
+## Requirements
 
-## Instrucciones
+Make sure you have the following installed:
 
-Sigue estos pasos para configurar y ejecutar el proyecto localmente:
+- Python 3.10 or higher  
+- Django 4.2.5 or higher  
+- Virtualenv 20.24 or higher  
 
-1. Clona el repositorio:
+## Getting Started
+
+Follow these steps to set up and run the project locally:
+
+1. **Clone the repository:**
 
    ```bash
    git clone git@github.com:Riddimental/SharePay_Backend.git
+   cd SharePay_Backend
    ```
 
-2. Crea un entorno virtual
+2. **Create a virtual environment:**
 
-   - **Windows**:
+   - **Windows:**
 
      ```cmd
      python -m venv myenv
      ```
 
-   - **macOS y Linux**:
+   - **macOS / Linux:**
 
      ```sh
      python3 -m venv myenv
      ```
 
-3. Activa el entorno virtual
+3. **Activate the virtual environment:**
 
-   - **Windows**:
+   - **Windows:**
 
      ```cmd
      .\myenv\Scripts\activate
      ```
 
-   - **macOS y Linux**:
+   - **macOS / Linux:**
 
      ```sh
      source myenv/bin/activate
      ```
 
-4. Instala los requisitos del proyecto en el entorno virtual:
+4. **Install dependencies:**
 
    ```bash
    pip install -r requirements.txt
    ```
 
-5. Ejecuta el servidor de desarrollo de Django:
+5. **Make migrations**
+
+   ```bash
+   python manage.py makemigrations && python manage.py migrate
+   ```
+
+6. **Make superuser**
+
+   ```bash
+   python manage.py createsuperuser
+   ```
+
+   give a username, email (optional) and password, you can acces to the api admin view at:
+   ```
+   http://127.0.0.1:8000/admin/
+   ```
+
+7. **Run the development server:**
 
    ```bash
    python manage.py runserver
    ```
 
-Esto ejecutará el servidor Backend de la aplicación SharePay App, que puedes encontrar en:
+Once the server is running, the backend will be available at:
 
-- [Repositorio SharePay App](https://github.com/MavelSterling/SharePay_AppWeb)
+```
+http://127.0.0.1:8000/
+```
+
+## Related Projects
+
+- [SharePay Frontend Repository](https://github.com/MavelSterling/SharePay_AppWeb)
